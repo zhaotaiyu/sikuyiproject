@@ -105,7 +105,7 @@ class MyRetryMiddleware(RetryMiddleware):
 
 	def process_exception(self, request, exception, spider):
 		global fetch_time,proxy
-		now_time = time.time() - 150
+		now_time = time.time() - 100
 		if now_time>fetch_time:
 			fetch_time,proxy = fetch_one_proxy()
 class MyUseragent():
