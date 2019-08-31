@@ -63,11 +63,7 @@ class KuaidailiMiddleware():
 		auth = "Basic %s" % (base64.b64encode(('%s:%s' % (self.username, self.password)).encode('utf-8'))).decode('utf-8')
 		request.headers['Proxy-Authorization'] = auth
 	def process_response(self,request,response,spider):
-		global fetch_time,proxy
 		if response.status!=200:
-			now_time = time.time() - 20
-			if now_time>fetch_time:
-				fetch_time,proxy = fetch_one_proxy()
 			myclient = pymongo.MongoClient('mongodb://ecs-a025-0002:27017/')
 			mydb=myclient[mongodatabase] 
 			mycol=mydb[mongotable]
@@ -85,27 +81,15 @@ class MyRetryMiddleware(RetryMiddleware):
 	logger = logging.getLogger(__name__)
 	def process_response(self,request,response,spider ):
 		global fetch_time,proxy
-		if 400<=response.status<500 or response.status>=600:
+		if response.status!=200 and response.status !=503:
 			now_time = time.time() - 20
 			if now_time>fetch_time:
 				fetch_time,proxy = fetch_one_proxy()
-				fetch_time,proxy = fetch_one_proxy()
-		retries = request.meta.get('retry_times', 0) + 1
-		retry_times = settings.getint('RETRY_TIMES')
-		if retries > retry_times:
-			myclient = pymongo.MongoClient('mongodb://ecs-a025-0002:27017/')
-			mydb = myclient[mongodatabase]
-			mycol = mydb[mongotable]
-			mydict = {"exception": "Gave up retrying {} failed {} times".format(request.url, retries, ),
-					  "url": request.url,
-					  'time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-			mycol.insert_one(mydict)
-			myclient.close()
 		return response
 
 	def process_exception(self, request, exception, spider):
 		global fetch_time,proxy
-		now_time = time.time() - 100
+		now_time = time.time() - 20
 		if now_time>fetch_time:
 			fetch_time,proxy = fetch_one_proxy()
 class MyUseragent():
