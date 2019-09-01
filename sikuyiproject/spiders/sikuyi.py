@@ -196,7 +196,7 @@ class SikuyiSpider(RedisSpider):
 					c_apt["company_id"]=company_id
 					c_apt["aptitude_type"] = tr.xpath("./td[@data-header='资质类别']/text()").extract_first()
 					c_apt["aptitude_id"] = tr.xpath("./td[@data-header='资质证书号']/text()").extract_first()
-					c_apt["aptitude_name"] = tr.xpath("./td[@data-header='资质名称']/text()").extract_first().strip()
+					c_apt["aptitude_name"] = str(tr.xpath("./td[@data-header='资质名称']/text()").extract_first()).strip()
 					c_apt["aptitude_startime"] = tr.xpath("./td[@data-header='发证日期']/text()").extract_first()
 					c_apt["aptitude_endtime"] = tr.xpath("./td[@data-header='证书有效期']/text()").extract_first()
 					c_apt["aptitude_organ"] = tr.xpath("./td[@data-header='发证机关']/text()").extract_first()
