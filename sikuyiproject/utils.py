@@ -21,23 +21,21 @@ def fetch_one_proxy():
 		try:
 			fetch_url = api_url.format(orderid)
 			r = requests.get(fetch_url)
-			if r.status_code != 200:
-				logger.error("fail to fetch proxy")
-				return False
-			content = json.loads(r.content.decode('utf-8'))
-			ips = content['data']['proxy_list']
-			proxy=ips[0]
-			proxies = {
-				"http": "http://%(user)s:%(pwd)s@%(proxy)s/" % {'user': username, 'pwd': password, 'proxy': proxy},
-				"https": "http://%(user)s:%(pwd)s@%(proxy)s/" % {'user': username, 'pwd': password, 'proxy': proxy}
-			}
-			req=requests.get(test_url,headers=headers,proxies=proxies,allow_redirects=False)
-			#安全狗认证
-			loc_url = req.headers.get("Location")
-			if loc_url:
-				loc_url = 'http://jzsc.mohurd.gov.cn' + loc_url
-				safe = requests.get(loc_url,headers=headers,proxies=proxies,allow_redirects=False)
-				fetch_time = time.time()
-				return fetch_time,proxy
+			if r.status_code == 200:
+				content = json.loads(r.content.decode('utf-8'))
+				ips = content['data']['proxy_list']
+				proxy=ips[0]
+				proxies = {
+					"http": "http://%(user)s:%(pwd)s@%(proxy)s/" % {'user': username, 'pwd': password, 'proxy': proxy},
+					"https": "http://%(user)s:%(pwd)s@%(proxy)s/" % {'user': username, 'pwd': password, 'proxy': proxy}
+				}
+				req=requests.get(test_url,headers=headers,proxies=proxies,allow_redirects=False)
+				#安全狗认证
+				loc_url = req.headers.get("Location")
+				if loc_url:
+					loc_url = 'http://jzsc.mohurd.gov.cn' + loc_url
+					safe = requests.get(loc_url,headers=headers,proxies=proxies,allow_redirects=False)
+					fetch_time = time.time()
+					return fetch_time,proxy
 		except:
 			pass
