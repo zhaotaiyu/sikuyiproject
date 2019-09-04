@@ -37,6 +37,7 @@ def fetch_one_proxy():
 					loc_url = 'http://jzsc.mohurd.gov.cn' + loc_url
 					safe = requests.get(loc_url,headers=headers,proxies=proxies,allow_redirects=False)
 					fetch_time = time.time()
+					logging.debug("已成功获取代理")
 					return fetch_time,proxy
 				logging.debug("安全认证失败")
 			logging.debug("获取代理失败")
