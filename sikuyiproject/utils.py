@@ -15,9 +15,10 @@ headers = {
 	"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"
 }
 def fetch_one_proxy():
-	print("**********************************切换代理*********************************************")
+	logging.debug("**********************************切换代理*********************************************")
 	time.sleep(1)
 	while 1:
+		time.sleep(2)
 		try:
 			fetch_url = api_url.format(orderid)
 			r = requests.get(fetch_url)
@@ -37,5 +38,7 @@ def fetch_one_proxy():
 					safe = requests.get(loc_url,headers=headers,proxies=proxies,allow_redirects=False)
 					fetch_time = time.time()
 					return fetch_time,proxy
+				logging.debug("安全认证失败")
+			logging.debug("获取代理失败")
 		except:
-			pass
+			logging.debug("获取代理失败")
