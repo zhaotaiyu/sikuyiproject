@@ -3,9 +3,18 @@ import logging
 import requests
 import json,time
 import random,datetime
+import psycopg2
 from scrapy.conf import settings
 username=settings.get("KUAI_USERNAME")
 password=settings.get("KUAI_PASSWORD")
+
+pgsql_uri = settings.get('PGSQL_URI')
+pgsql_db = settings.get('PGSQL_DATABASE')
+pgsql_user = settings.get('PGSQL_USER')
+pgsql_pass = settings.get('PGSQL_PASS')
+pgsql_port = settings.get('PGSQL_PORT')
+
+
 orderid = '966404044351881'  # 订单号
 # 提取代理链接，以私密代理为例
 api_url = "http://dps.kdlapi.com/api/getdps/?orderid={}&num=1&pt=1&format=json&sep=1"
@@ -45,3 +54,17 @@ def fetch_one_proxy():
 			logging.debug("获取代理失败")
 		except:
 			logging.debug("获取代理失败")
+
+def get_id(sql):
+	db = psycopg2.connect(database="sikuyitest", user="postgres", password="sikuyi", host="ecs-a025-0002", port=54321)
+	cursor = db.cursor() 
+	cursor.execute(sql)
+	datalist = []
+	alldata = cursor.fetchall()
+	for s in alldata:
+		data = s[0].split("?")[0]
+		if len(data)>5:
+			datalist.append(data)
+	cursor.close()
+	db.close()
+	return datalist

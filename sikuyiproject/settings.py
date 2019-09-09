@@ -69,7 +69,7 @@ ITEM_PIPELINES = {
    'sikuyiproject.pipelines.SikuyiprojectPipeline': 300,
    'sikuyiproject.pipelines.DatechangePipeline': 301,
    'sikuyiproject.pipelines.ScrapyKafkaPipeline': 304,
-   #'sikuyiproject.pipelines.PgsqlPipeline': 302,
+   'sikuyiproject.pipelines.PgsqlPipeline': 302,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
