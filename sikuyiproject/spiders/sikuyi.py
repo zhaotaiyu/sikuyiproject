@@ -36,7 +36,7 @@ class SikuyiSpider(RedisSpider):
 						while 1:
 							id_i +=1
 							url = "http://jzsc.mohurd.gov.cn/dataservice/query/comp/compDetail/00" + str(id_i)
-							yield Request(url,callback = self.parse_company)
+							yield Request(url,callback = self.parse_company,dont_filter=True)
 							if id_i+1 == id_j:
 								break
 				i += 1
