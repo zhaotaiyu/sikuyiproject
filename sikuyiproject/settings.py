@@ -25,7 +25,7 @@ ROBOTSTXT_OBEY = False
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 0.15
+DOWNLOAD_DELAY = 0.1
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
@@ -66,9 +66,9 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'sikuyiproject.pipelines.SikuyiprojectPipeline': 300,
-   'sikuyiproject.pipelines.DatechangePipeline': 301,
-   'sikuyiproject.pipelines.ScrapyKafkaPipeline': 304,
+   # 'sikuyiproject.pipelines.SikuyiprojectPipeline': 300,
+   # 'sikuyiproject.pipelines.DatechangePipeline': 301,
+   # 'sikuyiproject.pipelines.ScrapyKafkaPipeline': 304,
    # 'sikuyiproject.pipelines.PgsqlPipeline': 302,
 }
 
@@ -104,7 +104,7 @@ BLOOMFILTER_HASH_NUMBER = 6
 # Bloom Filter的bit参数，默认30，占用128MB空间，去重量级1亿
 BLOOMFILTER_BIT = 30
 SCHEDULER_PERSIST = True
-REDIS_URL = 'redis://:Z43saw9vGH4Ey3d8@r-2ze7fb50627e7a14pd.redis.rds.aliyuncs.com:6379/11'
+REDIS_URL = 'redis://:Z43saw9vGH4Ey3d8@r-2ze7fb50627e7a14pd.redis.rds.aliyuncs.com:6379/12'
 SCHEDULER_QUEUE_CLASS = "scrapy_redis.queue.LifoQueue"
 DOWNLOAD_TIMEOUT=100
 RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 403, 408, 429, 407]

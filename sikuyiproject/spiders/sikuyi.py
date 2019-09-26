@@ -1,81 +1,102 @@
 # -*- coding: utf-8 -*-
+import pymongo
 import scrapy
 from sikuyiproject.items import *
 from scrapy import Request,FormRequest
 import time,datetime
 from scrapy_redis.spiders import RedisSpider
-import pandas as pd
-from kafka import KafkaConsumer
 import time,re
-from scrapy.conf import settings
-from sikuyiproject.utils import get_id
+from sikuyiproject.utils import *
 
 class SikuyiSpider(RedisSpider):
 	name = 'sikuyi'
 	redis_key = 'SikuyiSpider:start_urls'
 	allowed_domains = ['jzsc.mohurd.gov.cn']
 	def parse(self,response):
-		sql1 = "SELECT company_id FROM companyinformation"
-		sql2 = "SELECT num FROM companyinformation"
-		id_list = get_id(sql1)
-		num_list = get_id(sql2)
-		id_list = list(set(id_list))
-		num_list = list(set(num_list))
-		id_list.sort()
-		num_list.sort()
-		i = 0
-		j = 1
-		while 1:
-			if j<len(id_list):
-				id_i = int(id_list[i])
-				id_j = int(id_list[j])
-				if (id_i+1) !=id_j:
-					data_i = id_list[i][0:12]
-					data_j = id_list[j][0:12]
-					if data_i == data_j:
-						while 1:
-							id_i +=1
-							url = "http://jzsc.mohurd.gov.cn/dataservice/query/comp/compDetail/00" + str(id_i)
-							yield Request(url,callback = self.parse_company,dont_filter=True)
-							if id_i+1 == id_j:
-								break
-				i += 1
-				j += 1
-			else:
-				break
-		# url="http://jzsc.mohurd.gov.cn/dataservice/query/comp/list"
-		# df = pd.read_csv("gongsi.csv", encoding="utf-8")
-		# company_list= df['company_name'].tolist()
-		# for company in company_list:
-		# 	if isinstance(company,str):
-		# 		if len(company_list)>5:
-		# 			formdata = {
-		# 				"qy_type":" ",
-		# 				"apt_scope":" ",
-		# 				"apt_code":" ",
-		# 				"qy_name":" ",
-		# 				"qy_code":" ",
-		# 				"apt_certno":" ",
-		# 				"qy_fr_name":" ",
-		# 				"qy_gljg":" ",
-		# 				"qy_reg_addr":" ",
-		# 				"qy_region":" ",
-		# 				"complexname":company
-		# 			}
-		# 			print(company)
-		# 			yield scrapy.FormRequest(url,formdata=formdata,callback=self.parse_next)
+		# sql1 = "SELECT company_id FROM companyinformation"
+		# sql2 = "SELECT num FROM companyinformation"
+		# id_list = get_id(sql1)
+		# num_list = get_id(sql2)
+		# id_list = list(set(id_list))
+		# num_list = list(set(num_list))
+		# id_list.sort()
+		# num_list.sort()
+		# i = 0
+		# j = 1
+		# while 1:
+		# 	if j<len(id_list):
+		# 		id_i = int(id_list[i])
+		# 		id_j = int(id_list[j])
+		# 		if (id_i+1) !=id_j:
+		# 			data_i = id_list[i][0:12]
+		# 			data_j = id_list[j][0:12]
+		# 			if data_i == data_j:
+		# 				while 1:
+		# 					id_i +=1
+		# 					url = "http://jzsc.mohurd.gov.cn/dataservice/query/comp/compDetail/00" + str(id_i)
+		# 					yield Request(url,callback = self.parse_company,dont_filter=True)
+		# 					if id_i+1 == id_j:
+		# 						break
+		# 		i += 1
+		# 		j += 1
+		# 	else:
+		# 		break
+		url="http://jzsc.mohurd.gov.cn/dataservice/query/comp/list"
+		wash = Wash()
+		wash.main()
+		company_set=wash.company_set
+		while company_set:
+			print("开始pop*****")
+			company = company_set.pop()
+			formdata = {
+				"qy_type":" ",
+				"apt_scope":" ",
+				"apt_code":" ",
+				"qy_name":" ",
+				"qy_code":" ",
+				"apt_certno":" ",
+				"qy_fr_name":" ",
+				"qy_gljg":" ",
+				"qy_reg_addr":" ",
+				"qy_region":" ",
+				"complexname":company
+			}
+			print(company)
+			yield FormRequest(url,formdata=formdata,callback=self.parse_next,meta={"company":company},priority=1)
 	def parse_next(self, response):
 		company_url=response.xpath("//tbody[@class='cursorDefault']/tr[1]/td[3]/a/@href").extract_first()
 		if company_url is not None:
-			company_url="http://jzsc.mohurd.gov.cn"+str(company_url)
-			print(company_url)
-			yield Request(url=company_url,callback=self.parse_company)
+			tr_list = response.xpath("//tbody[@class='cursorDefault']/tr")
+			for tr in tr_list:
+				company_url = tr.xpath("./td[3]/a/@href").extract_first()
+				company_url="http://jzsc.mohurd.gov.cn"+str(company_url)
+				yield Request(url=company_url,callback=self.parse_company)
+			page = response.meta.get("page",1)
+			total = int(response.xpath("//a[@sf='pagebar']/@*[name()='sf:data']").extract_first().split(",")[2].split(":")[-1])
+			if 15*page < total:
+				formdata = {
+					'apt_code': '',
+					'qy_fr_name': '',
+					'$total': str(total),
+					'qy_reg_addr': '',
+					'qy_code': '',
+					'qy_name': response.meta.get("company"),
+					'$pgsz': '15',
+					'apt_certno': '',
+					'qy_region': '',
+					'$reload': '0',
+					'qy_type': '',
+					'$pg': str(page+1),
+					'qy_gljg': '',
+					'apt_scope': ''
+				}
+				yield FormRequest(response.url,formdata=formdata,callback=self.parse_next,meta={"page":page+1})
 	def parse_company(self,response):
 		match = re.findall("对不起，未查询到任何企业数据",response.text)
 		if not match:
 			c_info = CompanyInformation()
 			# 公司名称
-			c_info["company_name"] = response.xpath("//div[@class='user_info spmtop']/b/text()").extract_first().strip()
+			c_info["company_name"] = str(response.xpath("//div[@class='user_info spmtop']/b/text()").extract_first()).strip()
 			# 公司ID
 			company_id = response.url.split("/")[-1]
 			c_info["company_id"] = company_id
@@ -107,28 +128,30 @@ class SikuyiSpider(RedisSpider):
 			yield Request(aptitude_url,callback=self.parse_aptitude,meta={"company_id":company_id})
 			# 注册人员url
 			registered_personnel_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[2]/a/@data-url").extract_first()
-			registered_personnel_url = "http://jzsc.mohurd.gov.cn" + registered_personnel_url
+			registered_personnel_url = "http://jzsc.mohurd.gov.cn" + str(registered_personnel_url)
 			yield Request(registered_personnel_url, callback=self.get_registered_personnel, meta={"company_id": company_id})
 			# 工程项目url
 			engineering_project_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[3]/a/@data-url").extract_first()
-			engineering_project_url = "http://jzsc.mohurd.gov.cn" + engineering_project_url
+			engineering_project_url = "http://jzsc.mohurd.gov.cn" + str(engineering_project_url)
 			yield Request(url=engineering_project_url,callback=self.get_engineering_project,meta={"company_id":company_id})
 			# 不良行为url
 			bad_behavior_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[4]/a/@data-url").extract_first()
-			bad_behavior_url = "http://jzsc.mohurd.gov.cn" + bad_behavior_url
+			bad_behavior_url = "http://jzsc.mohurd.gov.cn" + str(bad_behavior_url)
 			yield Request(url=bad_behavior_url,callback=self.parse_behavior,meta={"company_id":company_id,"reason":"不良行为"})
 			# 良好行为url
 			good_behavior_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[5]/a/@data-url").extract_first()
-			good_behavior_url = "http://jzsc.mohurd.gov.cn" + good_behavior_url
+			good_behavior_url = "http://jzsc.mohurd.gov.cn" + str(good_behavior_url)
 			yield Request(url=good_behavior_url, callback=self.parse_behavior,meta={"company_id": company_id, "reason": "良好行为"})
 			# 黑名单记录url
 			blacklist_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[6]/a/@data-url").extract_first()
-			blacklist_url = "http://jzsc.mohurd.gov.cn" + blacklist_url
+			blacklist_url = "http://jzsc.mohurd.gov.cn" + str(blacklist_url)
 			yield Request(url=blacklist_url, callback=self.parse_companny_blacklist,meta={"company_id": company_id, "reason": "黑名单"})
 			# 失信联合惩戒记录url
 			break_faith_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[7]/a/@data-url").extract_first()
-			break_faith_url = "http://jzsc.mohurd.gov.cn" + break_faith_url
+			break_faith_url = "http://jzsc.mohurd.gov.cn" + str(break_faith_url)
 			yield Request(url=break_faith_url, callback=self.parse_company_break_faith,meta={"company_id": company_id, "reason": "黑名单"})
+		else:
+			self.write_error(response)
 	#解析行为
 	def parse_behavior(self,response):
 		cuo=response.xpath("//tbody[@class='cursorDefault']/tr[1]/td/text()").extract_first()
@@ -911,3 +934,12 @@ class SikuyiSpider(RedisSpider):
 				behavior["status"] = 1
 				behavior["is_delete"] = 0
 				yield behavior
+
+	def write_error(self, response):
+		myclient = pymongo.MongoClient('mongodb://ecs-a025-0002:27017/')
+		mydb = myclient[MONGODATABASE]
+		mycol = mydb[MONGOTABLE]
+		mydict = {"url": response.url, "reason": "该页未返回数据", 'text': response.text, 'spider': 'sikuyi',
+				  'time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+		mycol.insert_one(mydict)
+		myclient.close()

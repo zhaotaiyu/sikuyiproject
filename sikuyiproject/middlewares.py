@@ -14,19 +14,18 @@ from twisted.internet.error import TimeoutError, TCPTimedOutError
 from scrapy.downloadermiddlewares.retry import RetryMiddleware
 from .utils import fetch_one_proxy
 import time
-from scrapy.conf import settings
+from .settings import *
 from scrapy.utils.response import response_status_message
 import pymongo
 import datetime
 import random
 
-DOWNLOADER_MIDDLEWARES=settings.get("DOWNLOADER_MIDDLEWARES")
 if "sikuyiproject.middlewares.KuaidailiMiddleware" in DOWNLOADER_MIDDLEWARES:
 	fetch_time,proxy = fetch_one_proxy()
-mongoclient=settings.get("MONGOCLIENT")
-mongodatabase=settings.get("MONGODATABASE")
-mongotable=settings.get("MONGOTABLE")
-class AbuyunProxyMiddleware():
+mongoclient=MONGOCLIENT
+mongodatabase=MONGODATABASE
+mongotable=MONGOTABLE
+class AbuyunProxyMiddleware(object):
 	def __init__(self,proxyuser,proxypass,proxyserver):
 		self.proxyuser = proxyuser
 		self.proxypass = proxypass
@@ -53,7 +52,7 @@ class AbuyunProxyMiddleware():
 			proxypass=crawler.settings.get("PROXYPASS"),
 			proxyserver=crawler.settings.get("PROXYSERVER"),
 		)
-class KuaidailiMiddleware():
+class KuaidailiMiddleware(object):
 	def __init__(self,username,password):
 		self.username=username
 		self.password=password

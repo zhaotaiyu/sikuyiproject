@@ -9,19 +9,19 @@ from sikuyiproject.items import *
 import re
 import json
 from pykafka import KafkaClient
-from scrapy.conf import settings
+from .settings import *
 from pykafka.exceptions import SocketDisconnectedError, LeaderNotAvailable
 import datetime
 import pymongo
 
-mongoclient=settings.get("MONGOCLIENT")
-mongodatabase=settings.get("MONGODATABASE")
-mongotable=settings.get("MONGOTABLE")
+mongoclient=MONGOCLIENT
+mongodatabase=MONGODATABASE
+mongotable=MONGOTABLE
 
 class SikuyiprojectPipeline(object):
 	def process_item(self, item, spider):
 		for key,value in item.items():
-			if value ==None:
+			if value is None:
 				item[key]="Null"
 		return item
 class DatechangePipeline(object):
@@ -90,11 +90,11 @@ class PgsqlPipeline(object):
 		return item
 class ScrapyKafkaPipeline(object):
 	def __init__(self):
-		kafka_ip_port = settings['BOOTSTRAP_SERVER']
+		kafka_ip_port = BOOTSTRAP_SERVER
 		# 初始化client
 		self._client = KafkaClient(hosts=kafka_ip_port)
 		# 初始化Producer 需要把topic name变成字节的形式
-		self._producer = self._client.topics[settings['TOPIC'].encode(encoding="UTF-8")].get_producer()
+		self._producer = self._client.topics[TOPIC.encode(encoding="UTF-8")].get_producer()
 	def process_item(self, item, spider):
 		msg={
 			"collection":item.collection,
@@ -105,7 +105,7 @@ class ScrapyKafkaPipeline(object):
 			print("fasongyitiao")
 		except (SocketDisconnectedError, LeaderNotAvailable) as e:
 			try:
-				self._producer = self._client.topics[settings['TOPIC'].encode(encoding="UTF-8")].get_producer()
+				self._producer = self._client.topics[TOPIC.encode(encoding="UTF-8")].get_producer()
 				self._producer.stop()
 				self._producer.start()
 				self._producer.produce(json.dumps((msg),ensure_ascii=False).encode(encoding="UTF-8"))
