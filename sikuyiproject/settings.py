@@ -68,8 +68,8 @@ DOWNLOADER_MIDDLEWARES = {
 ITEM_PIPELINES = {
    'sikuyiproject.pipelines.SikuyiprojectPipeline': 300,
    'sikuyiproject.pipelines.DatechangePipeline': 301,
-   # 'sikuyiproject.pipelines.ScrapyKafkaPipeline': 304,
-   'sikuyiproject.pipelines.PgsqlPipeline': 302,
+   'sikuyiproject.pipelines.ScrapyKafkaPipeline': 304,
+   # 'sikuyiproject.pipelines.PgsqlPipeline': 302,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -104,7 +104,7 @@ BLOOMFILTER_HASH_NUMBER = 6
 # Bloom Filter的bit参数，默认30，占用128MB空间，去重量级1亿
 BLOOMFILTER_BIT = 30
 SCHEDULER_PERSIST = True
-REDIS_URL = 'redis://:Z43saw9vGH4Ey3d8@r-2ze7fb50627e7a14pd.redis.rds.aliyuncs.com:6379/12'
+REDIS_URL = 'redis://:Z43saw9vGH4Ey3d8@r-2ze7fb50627e7a14pd.redis.rds.aliyuncs.com:6379/11'
 SCHEDULER_QUEUE_CLASS = "scrapy_redis.queue.LifoQueue"
 DOWNLOAD_TIMEOUT=100
 RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 403, 408, 429, 407]
@@ -124,7 +124,7 @@ MONGODATABASE='sikuyilog'
 MONGOTABLE='sikuyi'
 #KAFKA配置
 BOOTSTRAP_SERVER="49.4.90.247:6667"
-TOPIC="sikuyilatest"
+TOPIC="TOPIC_sikuyifinally"
 #abuyun代理配置
 PROXYUSER="H7895G9300YN511D"
 PROXYPASS="AC67F9AA92D6F49F"

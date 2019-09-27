@@ -46,9 +46,10 @@ def fetch_one_proxy():
                 #安全狗认证
                 loc_url = req.headers.get("Location")
                 if loc_url:
-                    loc_url = 'http://jzsc.mohurd.gov.cn' + loc_url
-                    safe = requests.get(loc_url,headers=headers,proxies=proxies,timeout=20,allow_redirects=False)
-                    logging.debug("安全狗认证成功")
+                    if "http" not in loc_url:
+                        loc_url = 'http://jzsc.mohurd.gov.cn' + loc_url
+                        safe = requests.get(loc_url,headers=headers,proxies=proxies,timeout=20,allow_redirects=False)
+                        logging.debug("安全狗认证成功")
                     fetch_time = time.time()
                     logging.debug("已成功获取代理")
                     return fetch_time,proxy

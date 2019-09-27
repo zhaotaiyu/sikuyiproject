@@ -23,6 +23,8 @@ class SikuyiprojectPipeline(object):
 		for key,value in item.items():
 			if value is None:
 				item[key]="Null"
+			if isinstance(value,str):
+				item[key] = value.strip("'")
 		return item
 class DatechangePipeline(object):
 	def process_item(self,item,spider):
