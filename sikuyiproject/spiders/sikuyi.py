@@ -143,7 +143,7 @@ class SikuyiSpider(RedisSpider):
 			# 良好行为url
 			good_behavior_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[5]/a/@data-url").extract_first()
 			good_behavior_url = "http://jzsc.mohurd.gov.cn" + str(good_behavior_url)
-			yield Request(url=good_behavior_url, callback=self.parse_behavior,meta={"company_id": company_id, "reason": "良好行为"})
+			#yield Request(url=good_behavior_url, callback=self.parse_behavior,meta={"company_id": company_id, "reason": "良好行为"})
 			# 黑名单记录url
 			blacklist_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[6]/a/@data-url").extract_first()
 			blacklist_url = "http://jzsc.mohurd.gov.cn" + str(blacklist_url)
@@ -161,25 +161,37 @@ class SikuyiSpider(RedisSpider):
 			tr_list=response.xpath("//tbody[@class='cursorDefault']/tr")
 			if tr_list:
 				for tr in tr_list:
-					behavior=BehaviorItem()
-					behavior["record_num"] = tr.xpath("./td[1]/text()").extract_first()
-					behavior["id"] = tr.xpath("./td[2]/a/@href").extract_first()
-					behavior["record_main"] = tr.xpath("./td[2]/a/text()").extract_first()
-					if behavior["record_main"] is None:
-						behavior["record_main"] = tr.xpath("./td[2]/text()").extract_first()
-					behavior["content"] = tr.xpath("./td[3]/text()").extract_first()
-					behavior["department"] = tr.xpath("./td[4]/text()").extract_first()
-					behavior["useful_date"] = tr.xpath("./td[5]/text()").extract_first()
-					behavior["in_date"] = None
-					behavior["out_date"] = None
-					behavior["legal_person"] = None
-					behavior["legal_person_idcard"] = None
-					behavior["reason"] = response.meta.get("reason")
-					behavior["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-					behavior["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-					behavior["status"] = 1
-					behavior["is_delete"] = 0
-					yield behavior
+					credit=BehaviorItem()
+					# 诚信记录编号
+					credit["record_num"] = str(tr.xpath("./td[1]/span/text()").extract_first()).strip()
+					# 诚信记录主体
+					credit["record_main"] = str(tr.xpath("./td[2]/a/text()").extract_first()).strip()
+					if credit["record_main"] == "None":
+						credit["record_main"] = str(tr.xpath("./td[2]/text()").extract_first()).strip()
+					# 诚信主体id
+					credit["main_id"] = str(tr.xpath("./td[2]/a/@href").extract_first()).strip().split("/")[-1]
+					# 决定内容
+					credit["record_name"] = str(tr.xpath("./td[3]/text()[2]").extract_first()).strip()
+					# 事由
+					credit["content"] = str(tr.xpath("./td[3]/div/a/@data-text").extract_first()).strip()
+					# 实施部门
+					credit["department"] = str(tr.xpath("./td[4]/text()").extract_first()).strip()
+					# 文号
+					credit["refer_num"] = str(tr.xpath("./td[4]/div/text()").extract_first()).strip()
+					# 决定日期
+					credit["in_date"] = str(tr.xpath("./td[3]/div/span[2]/text()").extract_first()).strip().split("：")[
+						-1]
+					# 发布有效期
+					credit["out_date"] = str(tr.xpath("./td[5]/text()").extract_first()).strip()
+					# 原因
+					credit["reason"] = str(tr.xpath("./td[1]/div/div/a/text()").extract_first()).strip()
+					# 主体类型
+					credit["main_type"] = credit["record_num"].split("-")[1]
+					# 诚信类型
+					credit["record_type"] = "bad"
+					credit["created_at"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+					credit["updated_at"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+					yield credit
 	#解析企业黑名单
 	def parse_companny_blacklist(self,response):
 		cuo = response.xpath("//tbody[@class='cursorDefault']/tr[1]/td/text()").extract_first()
@@ -187,29 +199,40 @@ class SikuyiSpider(RedisSpider):
 			tr_list = response.xpath("//tbody[@class='cursorDefault']/tr")
 			if tr_list:
 				for tr in tr_list:
-					behavior = BehaviorItem()
-					behavior["record_num"] = str(tr.xpath("./td[1]/text()").extract_first()).strip()
-					behavior["id"] = tr.xpath("./td[2]/a/@href").extract_first()
-					behavior["record_main"] = tr.xpath("./td[2]/a/text()").extract_first()
-					if behavior["record_main"] is None:
-						behavior["record_main"] = str(tr.xpath("./td[2]/text()").extract_first()).strip()
-						behavior["id"] = str(tr.xpath("./td[2]/a/@href").extract_first()).split("/")[-1]
+					credit = BehaviorItem()
+					# 黑名单记录编号
+					credit["record_num"] = str(tr.xpath("./td[1]/text()").extract_first()).strip()
+					# 黑名单记录主体
+					credit["record_main"] = str(tr.xpath("./td[2]/a/text()").extract_first()).strip()
+					if credit["record_main"] == "None":
+						credit["record_main"] = str(tr.xpath("./td[2]/text()").extract_first()).strip()
+					# 黑名单记录主体id
+					credit["main_id"] = str(tr.xpath("./td[2]/a/@href").extract_first()).strip().split("/")[-1]
+					# 黑名单认定依据
+					credit["content"] = str(tr.xpath("./td[3]/text()[2]").extract_first()).replace("\n", "").strip()
+					credit["record_name"] = str(tr.xpath("./td[3]/text()[2]").extract_first()).replace("\n", "").strip()
+					# 文号
+					credit["refer_num"] = str(tr.xpath("./td[3]/text()[2]").extract_first()).replace("\n", "").strip()
+					r = re.findall(".*（(\D+.*号)）", credit["refer_num"])
+					if r:
+						credit["refer_num"] = r[0]
 					else:
-						behavior["id"] = str(tr.xpath("./td[2]/a/@href").extract_first()).split("/")[-1]
-						behavior["record_main"] = str(tr.xpath("./td[2]/a/text()").extract_first()).strip()
-					behavior["content"] = str(tr.xpath("./td[3]")[0].xpath("string(.)").extract_first()).strip()
-					behavior["department"] = tr.xpath("./td[4]/text()").extract_first()
-					behavior["useful_date"] = None
-					behavior["in_date"] = tr.xpath("./td[5]/text()").extract_first()
-					behavior["out_date"] = tr.xpath("./td[6]/text()").extract_first()
-					behavior["legal_person"] = None
-					behavior["legal_person_idcard"] = None
-					behavior["reason"] = response.meta.get("reason")
-					behavior["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-					behavior["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-					behavior["status"] = 1
-					behavior["is_delete"] = 0
-					yield behavior
+						credit["refer_num"] = None
+					# 认定部门
+					credit["department"] = str(tr.xpath("./td[4]/text()").extract_first()).strip()
+					# 列入黑名单日期
+					credit["in_date"] = str(tr.xpath("./td[5]/text()").extract_first()).strip()
+					# 移出黑名单日期
+					credit["out_date"] = str(tr.xpath("./td[6]/text()").extract_first()).strip()
+					# 原因
+					credit["reason"] = str(tr.xpath("./td[1]/div/div/a/text()").extract_first()).strip()
+					# 主体类型
+					credit["main_type"] = "QY"
+					# 诚信类型
+					credit["record_type"] = "bad"
+					credit["created_at"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+					credit["updated_at"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+					yield credit
 	#解析失信联合惩戒记录
 	def parse_company_break_faith(self,response):
 		cuo = response.xpath("//tbody[@class='cursorDefault']/tr[1]/td/text()").extract_first()
@@ -217,29 +240,39 @@ class SikuyiSpider(RedisSpider):
 			tr_list = response.xpath("//tbody[@class='cursorDefault']/tr")
 			if tr_list:
 				for tr in tr_list:
-					behavior = BehaviorItem()
-					behavior["record_num"] = tr.xpath("./td[1]/span/text()").extract_first()
-					behavior["id"] = tr.xpath("./td[2]/a/@href").extract_first()
-					behavior["record_main"] = tr.xpath("./td[2]/a/text()").extract_first()
-					if behavior["record_main"] is None:
-						behavior["record_main"] = tr.xpath("./td[2]/text()").extract_first()
-						behavior["id"] = str(tr.xpath("./td[2]/a/@href").extract_first()).split("/")[-1]
-					else:
-						behavior["id"] = str(tr.xpath("./td[2]/a/@href").extract_first()).split("/")[-1]
-						behavior["record_main"] = str(tr.xpath("./td[2]/a/text()").extract_first()).strip()
-					behavior["content"] = str(tr.xpath("./td[4]/div/span/text()").extract_first()).strip()+" "+str(tr.xpath("./td[4]/text()[2]").extract_first()).strip()
-					behavior["department"] =tr.xpath("./td[5]/text()").extract_first()
-					behavior["useful_date"] = None
-					behavior["in_date"] = tr.xpath("./td[6]/text()").extract_first()
-					behavior["out_date"] = None
-					behavior["legal_person"] = tr.xpath("./td[3]/div[1]/span/text()").extract_first()
-					behavior["legal_person_idcard"] = str(tr.xpath("./td[3]/text()[2]").extract_first()).strip()
-					behavior["reason"] = response.meta.get("reason")
-					behavior["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-					behavior["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-					behavior["status"] = 1
-					behavior["is_delete"] = 0
-					yield behavior
+					credit = BehaviorItem()
+					# 失信记录编号
+					credit["record_num"] = str(tr.xpath("./td[1]/span/text()").extract_first()).strip()
+					# 失信联合惩戒记录主体
+					credit["record_main"] = str(tr.xpath("./td[2]/a/text()").extract_first()).strip()
+					if credit["record_main"] == "None":
+						credit["record_main"] = str(tr.xpath("./td[2]/text()").extract_first()).strip()
+					# 失信联合惩戒记录主体id
+					credit["main_id"] = str(tr.xpath("./td[2]/a/@href").extract_first()).strip().split("/")[-1]
+					# 法人姓名
+					credit["legal_person"] = str(tr.xpath("./td[3]/div/span/text()").extract_first()).strip()
+					# 法人身份证id
+					credit["legal_person_idcard"] = str(tr.xpath("./td[3]/text()[2]").extract_first()).strip()
+					# 列入名单事由
+					credit["record_name"] = str(tr.xpath("./td[4]/text()[2]").extract_first()).strip()
+					# 备忘录
+					credit["content"] = str(tr.xpath("./td[4]/div/a/@data-text").extract_first()).strip()
+					# 文号
+					credit["refer_num"] = str(tr.xpath("./td[4]/div/span/text()").extract_first()).strip().split("：")[
+						-1]
+					# 认定部门
+					credit["department"] = str(tr.xpath("./td[5]/text()").extract_first()).strip()
+					# 列入日期
+					credit["in_date"] = str(tr.xpath("./td[6]/text()").extract_first()).strip().split("：")[-1]
+					# 原因
+					credit["reason"] = str(tr.xpath("./td[1]/div/div/a/text()").extract_first()).strip()
+					# 主体类型
+					credit["main_type"] = "QY"
+					# 诚信类型
+					credit["record_type"] = "bad"
+					credit["created_at"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+					credit["updated_at"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+					yield credit
 	#解析资质
 	def parse_aptitude(self, response):
 		#print("开始解析资质资格url----"+response.url)
@@ -294,10 +327,10 @@ class SikuyiSpider(RedisSpider):
 						yield Request(url=person_bad_behaviour_url, callback=self.parse_behavior, meta={"reason": "不良行为"})
 						# 良好行为url
 						person_good_behaviour_url = "http://jzsc.mohurd.gov.cn/dataservice/query/staff/staffCreditRecordList/" + person_id + "/1"
-						yield Request(url=person_good_behaviour_url, callback=self.parse_behavior, meta={"reason": "良好行为"})
+						#yield Request(url=person_good_behaviour_url, callback=self.parse_behavior, meta={"reason": "良好行为"})
 						# 黑名单记录url
 						person_blacklist_url = "http://jzsc.mohurd.gov.cn/dataservice/query/staff/staffCreditBlackList/" + person_id
-						# yield Request(url=person_blacklist_url, callback=self.parse_person_blacklist,meta={"reason": "黑名单"})
+						yield Request(url=person_blacklist_url, callback=self.parse_companny_blacklist,meta={"reason": "黑名单"})
 						# 变更记录url
 						person_change_record_url = "http://jzsc.mohurd.gov.cn/dataservice/query/staff/staffWorkRecordList/" + person_id
 						yield Request(url=person_change_record_url, callback=self.parse_change_record,meta={"person_id": person_id, })
@@ -315,10 +348,10 @@ class SikuyiSpider(RedisSpider):
 			yield Request(url=person_bad_behaviour_url, callback=self.parse_behavior, meta={"reason": "不良行为"})
 			# 良好行为url
 			person_good_behaviour_url = "http://jzsc.mohurd.gov.cn/dataservice/query/staff/staffCreditRecordList/" + person_id + "/1"
-			yield Request(url=person_good_behaviour_url, callback=self.parse_behavior,meta={"reason": "良好行为"})
+			#yield Request(url=person_good_behaviour_url, callback=self.parse_behavior,meta={"reason": "良好行为"})
 			# 黑名单记录url
 			person_blacklist_url = "http://jzsc.mohurd.gov.cn/dataservice/query/staff/staffCreditBlackList/" + person_id
-			#yield Request(url=person_blacklist_url, callback=self.parse_person_blacklist,meta={"reason": "黑名单"})
+			yield Request(url=person_blacklist_url, callback=self.parse_person_blacklist,meta={"reason": "黑名单"})
 			# 变更记录url
 			person_change_record_url = "http://jzsc.mohurd.gov.cn/dataservice/query/staff/staffWorkRecordList/" + person_id
 			yield Request(url=person_change_record_url,callback=self.parse_change_record,meta={"person_id":person_id,})
@@ -350,7 +383,7 @@ class SikuyiSpider(RedisSpider):
 				if len(dl.xpath("./dd"))==5:
 					#人员
 					p_cert["person_id"]=p_info["person_id"]
-					p_cert["certificate_name"] = dl.xpath("./dd[1]/b/text()").extract_first()
+					p_cert["aptitude_name"] = dl.xpath("./dd[1]/b/text()").extract_first()
 					# 证书编号
 					p_cert["certificate_num"] = dl.xpath("./dd[3]/text()").extract_first()
 					# 执业印章号
@@ -365,7 +398,7 @@ class SikuyiSpider(RedisSpider):
 					p_cert["major"]=dl.xpath("./dd[2]/text()").extract_first()
 				else:
 					p_cert["person_id"] = p_info["person_id"]
-					p_cert["certificate_name"] = dl.xpath("./dd[1]/b/text()").extract_first()
+					p_cert["aptitude_name"] = dl.xpath("./dd[1]/b/text()").extract_first()
 					# 证书编号
 					p_cert["certificate_num"] = dl.xpath("./dd[2]/text()").extract_first()
 					# 执业印章号
@@ -664,7 +697,7 @@ class SikuyiSpider(RedisSpider):
 					project_person["person_name"]=str(tr.xpath("./td[@data-header='姓名']/text()").extract_first()).strip()
 				project_person["certificate_seal_id"] = tr.xpath("./td[@data-header='执业印章号']/text()").extract_first()
 				project_person["project_stage"] = "施工图审查"
-				project_person["certificate_name"]=tr.xpath("./td[@data-header='注册类型及等级']/text()").extract_first()
+				project_person["aptitude_name"]=tr.xpath("./td[@data-header='注册类型及等级']/text()").extract_first()
 				project_person["identification_id"] = tr.xpath("./td[@data-header='证件号码']/text()").extract_first()
 				project_person["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 				project_person["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -817,7 +850,7 @@ class SikuyiSpider(RedisSpider):
 					project_person["person_name"] = str(tr.xpath("./td[@data-header='姓名']/text()").extract_first()).strip()
 				project_person["certificate_seal_id"] = tr.xpath("./td[@data-header='执业印章号']/text()").extract_first()
 				project_person["project_stage"] = "施工许可"
-				project_person["certificate_name"] = tr.xpath("./td[@data-header='注册类型及等级']/text()").extract_first()
+				project_person["aptitude_name"] = tr.xpath("./td[@data-header='注册类型及等级']/text()").extract_first()
 				project_person["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 				project_person["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 				project_person["status"] = 1
@@ -900,7 +933,7 @@ class SikuyiSpider(RedisSpider):
 					project_person["person_name"] = str(tr.xpath("./td[@data-header='姓名']/text()").extract_first()).strip()
 				project_person["certificate_seal_id"] = tr.xpath("./td[@data-header='执业印章号']/text()").extract_first()
 				project_person["project_stage"] = "竣工验收备案"
-				project_person["certificate_name"] = tr.xpath("./td[@data-header='注册类型及等级']/text()").extract_first()
+				project_person["aptitude_name"] = tr.xpath("./td[@data-header='注册类型及等级']/text()").extract_first()
 				project_person["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 				project_person["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 				project_person["status"] = 1

@@ -66,10 +66,10 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   # 'sikuyiproject.pipelines.SikuyiprojectPipeline': 300,
-   # 'sikuyiproject.pipelines.DatechangePipeline': 301,
+   'sikuyiproject.pipelines.SikuyiprojectPipeline': 300,
+   'sikuyiproject.pipelines.DatechangePipeline': 301,
    # 'sikuyiproject.pipelines.ScrapyKafkaPipeline': 304,
-   # 'sikuyiproject.pipelines.PgsqlPipeline': 302,
+   'sikuyiproject.pipelines.PgsqlPipeline': 302,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -114,7 +114,7 @@ RETRY_TIMES = 999
 LOG_LEVEL = 'DEBUG'
 #PGSQL
 PGSQL_URI="ecs-a025-0002"
-PGSQL_DATABASE="sikuyitest"
+PGSQL_DATABASE="cic_database"
 PGSQL_PASS="sikuyi"
 PGSQL_USER="postgres"
 PGSQL_PORT=54321
