@@ -57,7 +57,7 @@ class PersonCertificate(scrapy.Item):
     certificate_num = scrapy.Field()
     person_id=scrapy.Field()
     major=scrapy.Field()
-    certificate_type=scrapy.Field()
+    certificate_name=scrapy.Field()
     certificate_seal_id=scrapy.Field()
     certificate_useful_time=scrapy.Field()
     certificate_company_name=scrapy.Field()

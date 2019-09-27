@@ -46,7 +46,6 @@ class SikuyiSpider(RedisSpider):
 		wash.main()
 		company_set=wash.company_set
 		while company_set:
-			print("开始pop*****")
 			company = company_set.pop()
 			formdata = {
 				"qy_type":" ",
@@ -72,7 +71,10 @@ class SikuyiSpider(RedisSpider):
 				company_url="http://jzsc.mohurd.gov.cn"+str(company_url)
 				yield Request(url=company_url,callback=self.parse_company)
 			page = response.meta.get("page",1)
-			total = int(response.xpath("//a[@sf='pagebar']/@*[name()='sf:data']").extract_first().split(",")[2].split(":")[-1])
+			try:
+				total = int(response.xpath("//a[@sf='pagebar']/@*[name()='sf:data']").extract_first().split(",")[2].split(":")[-1])
+			except:
+				total = 0
 			if 15*page < total:
 				formdata = {
 					'apt_code': '',
@@ -348,7 +350,7 @@ class SikuyiSpider(RedisSpider):
 				if len(dl.xpath("./dd"))==5:
 					#人员
 					p_cert["person_id"]=p_info["person_id"]
-					p_cert["certificate_type"] = dl.xpath("./dd[1]/b/text()").extract_first()
+					p_cert["certificate_name"] = dl.xpath("./dd[1]/b/text()").extract_first()
 					# 证书编号
 					p_cert["certificate_num"] = dl.xpath("./dd[3]/text()").extract_first()
 					# 执业印章号
@@ -363,7 +365,7 @@ class SikuyiSpider(RedisSpider):
 					p_cert["major"]=dl.xpath("./dd[2]/text()").extract_first()
 				else:
 					p_cert["person_id"] = p_info["person_id"]
-					p_cert["certificate_type"] = dl.xpath("./dd[1]/b/text()").extract_first()
+					p_cert["certificate_name"] = dl.xpath("./dd[1]/b/text()").extract_first()
 					# 证书编号
 					p_cert["certificate_num"] = dl.xpath("./dd[2]/text()").extract_first()
 					# 执业印章号
@@ -662,7 +664,7 @@ class SikuyiSpider(RedisSpider):
 					project_person["person_name"]=str(tr.xpath("./td[@data-header='姓名']/text()").extract_first()).strip()
 				project_person["certificate_seal_id"] = tr.xpath("./td[@data-header='执业印章号']/text()").extract_first()
 				project_person["project_stage"] = "施工图审查"
-				project_person["certificate_type"]=tr.xpath("./td[@data-header='注册类型及等级']/text()").extract_first()
+				project_person["certificate_name"]=tr.xpath("./td[@data-header='注册类型及等级']/text()").extract_first()
 				project_person["identification_id"] = tr.xpath("./td[@data-header='证件号码']/text()").extract_first()
 				project_person["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 				project_person["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -815,7 +817,7 @@ class SikuyiSpider(RedisSpider):
 					project_person["person_name"] = str(tr.xpath("./td[@data-header='姓名']/text()").extract_first()).strip()
 				project_person["certificate_seal_id"] = tr.xpath("./td[@data-header='执业印章号']/text()").extract_first()
 				project_person["project_stage"] = "施工许可"
-				project_person["certificate_type"] = tr.xpath("./td[@data-header='注册类型及等级']/text()").extract_first()
+				project_person["certificate_name"] = tr.xpath("./td[@data-header='注册类型及等级']/text()").extract_first()
 				project_person["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 				project_person["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 				project_person["status"] = 1
@@ -898,7 +900,7 @@ class SikuyiSpider(RedisSpider):
 					project_person["person_name"] = str(tr.xpath("./td[@data-header='姓名']/text()").extract_first()).strip()
 				project_person["certificate_seal_id"] = tr.xpath("./td[@data-header='执业印章号']/text()").extract_first()
 				project_person["project_stage"] = "竣工验收备案"
-				project_person["certificate_type"] = tr.xpath("./td[@data-header='注册类型及等级']/text()").extract_first()
+				project_person["certificate_name"] = tr.xpath("./td[@data-header='注册类型及等级']/text()").extract_first()
 				project_person["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 				project_person["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 				project_person["status"] = 1
