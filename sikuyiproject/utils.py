@@ -75,7 +75,7 @@ class Wash:
         self.company_set = set()
         self.company_list = list()
         self.conn = psycopg2.connect(host='119.3.206.20', port=54321, user='postgres', password='postgres',
-                                     database='sikuyilatest')
+                                     database='cic_database')
         self.cursor = self.conn.cursor()
 
         sql = "select company_name from company_wash.company_finally"

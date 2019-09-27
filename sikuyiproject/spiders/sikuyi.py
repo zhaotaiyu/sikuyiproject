@@ -60,7 +60,6 @@ class SikuyiSpider(RedisSpider):
 				"qy_region":" ",
 				"complexname":company
 			}
-			print(company)
 			yield FormRequest(url,formdata=formdata,callback=self.parse_next,meta={"company":company},priority=1)
 	def parse_next(self, response):
 		company_url=response.xpath("//tbody[@class='cursorDefault']/tr[1]/td[3]/a/@href").extract_first()
@@ -92,7 +91,7 @@ class SikuyiSpider(RedisSpider):
 					'qy_gljg': '',
 					'apt_scope': ''
 				}
-				yield FormRequest(response.url,formdata=formdata,callback=self.parse_next,meta={"page":page+1})
+				yield FormRequest(response.url,formdata=formdata,callback=self.parse_next,meta={"page":page+1,"company":response.meta.get("company")})
 	def parse_company(self,response):
 		match = re.findall("对不起，未查询到任何企业数据",response.text)
 		if not match:
