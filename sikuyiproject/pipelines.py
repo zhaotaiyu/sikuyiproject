@@ -60,7 +60,7 @@ class PgsqlPipeline(object):
 		self.db.close()
 	def process_item(self,item,spider):
 		ite=dict(item)
-		sql="INSERT INTO sikuyi.{} (".format(item.collection)
+		sql="INSERT INTO company_wash.{} (".format(item.collection)
 		v_list=[]
 		k_list=[]
 		for key,value in ite.items():

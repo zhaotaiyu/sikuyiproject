@@ -66,7 +66,7 @@ class KuaidailiMiddleware(object):
 			myclient = pymongo.MongoClient('mongodb://ecs-a025-0002:27017/')
 			mydb=myclient[mongodatabase] 
 			mycol=mydb[mongotable]
-			mydict = {"response_status":response.status,"url":response.url,'time':datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+			mydict = {"response_status":response.status,"url":response.url,'time':datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),'request':request.body.__repr__()}
 			mycol.insert_one(mydict)
 			myclient.close()
 		return response
@@ -91,7 +91,7 @@ class MyRetryMiddleware(RetryMiddleware):
 		now_time = time.time() - 20
 		if now_time>fetch_time:
 			fetch_time,proxy = fetch_one_proxy()
-class MyUseragent():
+class MyUseragent(object):
 	def process_request(self,request,spider):
 		USER_AGENT_LIST = [
 		'MSIE (MSIE 6.0; X11; Linux; i686) Opera 7.23',

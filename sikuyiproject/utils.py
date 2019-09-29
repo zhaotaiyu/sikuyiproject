@@ -79,7 +79,7 @@ class Wash:
                                      database='cic_database')
         self.cursor = self.conn.cursor()
 
-        sql = "select company_name from company_wash.company_finally"
+        sql = "select company_name from company_wash.company_total"
         self.cursor.execute(sql)
         company_msgs = self.cursor.fetchall()
         for company_msg in company_msgs:
