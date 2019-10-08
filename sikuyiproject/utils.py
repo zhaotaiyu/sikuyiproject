@@ -79,7 +79,7 @@ class Wash:
                                      database='cic_database')
         self.cursor = self.conn.cursor()
 
-        sql = "select company_name from company_wash.company_total"
+        sql = "select company_name from company_wash.company_finally"
         self.cursor.execute(sql)
         company_msgs = self.cursor.fetchall()
         for company_msg in company_msgs:
@@ -132,7 +132,6 @@ class Wash:
                 msg = ''.join(list(map(lambda x: re.sub('\s', '', x), i[start: end])))
                 self.company_set.add(msg.strip('（').strip('('))
 
-        self.company_list = []
         self.cursor.close()
         self.conn.close()
 
