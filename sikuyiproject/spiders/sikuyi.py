@@ -13,18 +13,26 @@ class SikuyiSpider(RedisSpider):
 	redis_key = 'SikuyiSpider:start_urls'
 	allowed_domains = ['jzsc.mohurd.gov.cn']
 	def parse(self,response):
-		# sql1 = "SELECT company_id FROM companyinformation"
-		# sql2 = "SELECT num FROM companyinformation"
-		# id_list = get_id(sql1)
-		# num_list = get_id(sql2)
+		sql1 = "SELECT distinct company_id FROM company_wash.companyinformation"
+		#sql2 = "SELECT num FROM companyinformation"
+		id_list,completed_company_list = get_id(sql1)
+		print(completed_company_list)
+		for id_i in id_list:
+			if len(id_i) == 18:
+				if id_i not in completed_company_list:
+					url = "http://jzsc.mohurd.gov.cn/dataservice/query/comp/compDetail/" + str(id_i)
+					yield Request(url,callback = self.parse_company,meta={"company_id":id_i})
+
+		# #num_list = get_id(sql2)
 		# id_list = list(set(id_list))
-		# num_list = list(set(num_list))
+		# #num_list = list(set(num_list))
 		# id_list.sort()
-		# num_list.sort()
-		# i = 0
-		# j = 1
+		# #num_list.sort()
+		# i = 218858
+		# j = 218859
 		# while 1:
 		# 	if j<len(id_list):
+		# 	#if j < 218859:
 		# 		id_i = int(id_list[i])
 		# 		id_j = int(id_list[j])
 		# 		if (id_i+1) !=id_j:
@@ -41,66 +49,76 @@ class SikuyiSpider(RedisSpider):
 		# 		j += 1
 		# 	else:
 		# 		break
-		url="http://jzsc.mohurd.gov.cn/dataservice/query/comp/list"
-		wash = Wash()
-		wash.main()
-		company_set=wash.company_list
-		while company_set:
-			company = company_set.pop()
-			formdata = {
-				"qy_type":" ",
-				"apt_scope":" ",
-				"apt_code":" ",
-				"qy_name":" ",
-				"qy_code":" ",
-				"apt_certno":" ",
-				"qy_fr_name":" ",
-				"qy_gljg":" ",
-				"qy_reg_addr":" ",
-				"qy_region":" ",
-				"complexname":company
-			}
-			yield FormRequest(url,formdata=formdata,callback=self.parse_next,meta={"company":company},priority=1)
-	def parse_next(self, response):
-		company_url=response.xpath("//tbody[@class='cursorDefault']/tr[1]/td[3]/a/@href").extract_first()
-		if company_url is not None:
-			tr_list = response.xpath("//tbody[@class='cursorDefault']/tr")
-			for tr in tr_list:
-				company_url = tr.xpath("./td[3]/a/@href").extract_first()
-				company_url="http://jzsc.mohurd.gov.cn"+str(company_url)
-				yield Request(url=company_url,callback=self.parse_company,meta={"company":response.meta.get("company")})
-			page = response.meta.get("page",1)
-			try:
-				total = int(response.xpath("//a[@sf='pagebar']/@*[name()='sf:data']").extract_first().split(",")[2].split(":")[-1])
-			except:
-				total = 0
-			if 15*page < total:
-				formdata = {
-					'apt_code': '',
-					'qy_fr_name': '',
-					'$total': str(total),
-					'qy_reg_addr': '',
-					'qy_code': '',
-					'qy_name': response.meta.get("company"),
-					'$pgsz': '15',
-					'apt_certno': '',
-					'qy_region': '',
-					'$reload': '0',
-					'qy_type': '',
-					'$pg': str(page+1),
-					'qy_gljg': '',
-					'apt_scope': ''
-				}
-				yield FormRequest(response.url,formdata=formdata,callback=self.parse_next,meta={"page":page+1,"company":response.meta.get("company")})
-		else:
-			myclient = pymongo.MongoClient('mongodb://ecs-a025-0002:27017/')
-			mydb = myclient[MONGODATABASE]
-			mycol = mydb['not_find']
-			mydict = {"company": response.meta.get("company")}
-			mycol.insert_one(mydict)
-			myclient.close()
+
+		# url="http://jzsc.mohurd.gov.cn/dataservice/query/comp/list"
+		# wash = Wash()
+		# wash.main()
+		# company_set=wash.company_set
+		# while company_set:
+		# 	company = company_set.pop()
+		# 	formdata = {
+		# 		"qy_type":" ",
+		# 		"apt_scope":" ",
+		# 		"apt_code":" ",
+		# 		"qy_name":" ",
+		# 		"qy_code":" ",
+		# 		"apt_certno":" ",
+		# 		"qy_fr_name":" ",
+		# 		"qy_gljg":" ",
+		# 		"qy_reg_addr":" ",
+		# 		"qy_region":" ",
+		# 		"complexname":company
+		# 	}
+		# 	yield FormRequest(url,formdata=formdata,callback=self.parse_next,meta={"company":company},priority=1)
+	# def parse_next(self, response):
+	# 	company_url=response.xpath("//tbody[@class='cursorDefault']/tr[1]/td[3]/a/@href").extract_first()
+	# 	if company_url is not None:
+	# 		tr_list = response.xpath("//tbody[@class='cursorDefault']/tr")
+	# 		for tr in tr_list:
+	# 			company_url = tr.xpath("./td[3]/a/@href").extract_first()
+	# 			company_url="http://jzsc.mohurd.gov.cn"+str(company_url)
+	# 			yield Request(url=company_url,callback=self.parse_company,meta={"company":response.meta.get("company")})
+	# 		page = response.meta.get("page",1)
+	# 		try:
+	# 			total = int(response.xpath("//a[@sf='pagebar']/@*[name()='sf:data']").extract_first().split(",")[2].split(":")[-1])
+	# 		except:
+	# 			total = 0
+	# 		if 15*page < total:
+	# 			formdata = {
+	# 				'apt_code': '',
+	# 				'qy_fr_name': '',
+	# 				'$total': str(total),
+	# 				'qy_reg_addr': '',
+	# 				'qy_code': '',
+	# 				'qy_name': response.meta.get("company"),
+	# 				'$pgsz': '15',
+	# 				'apt_certno': '',
+	# 				'qy_region': '',
+	# 				'$reload': '0',
+	# 				'qy_type': '',
+	# 				'$pg': str(page+1),
+	# 				'qy_gljg': '',
+	# 				'apt_scope': ''
+	# 			}
+	# 			yield FormRequest(response.url,formdata=formdata,callback=self.parse_next,meta={"page":page+1,"company":response.meta.get("company")})
+	# 	else:
+	# 		myclient = pymongo.MongoClient('mongodb://ecs-a025-0002:27017/')
+	# 		mydb = myclient[MONGODATABASE]
+	# 		mycol = mydb['not_find']
+	# 		mydict = {"company": response.meta.get("company")}
+	# 		mycol.insert_one(mydict)
+	# 		myclient.close()
 	def parse_company(self,response):
 		match = re.findall("对不起，未查询到任何企业数据",response.text)
+		try:
+			myclient = pymongo.MongoClient('mongodb://ecs-a025-0002:27017/')
+			mydb = myclient[MONGODATABASE]
+			mycol = mydb["completed_company"]
+			mydict = {"url": response.url, "company_id": response.meta.get("company_id"),'time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+			mycol.insert_one(mydict)
+			myclient.close()
+		except:
+			pass
 		if not match:
 			c_info = CompanyInformation()
 			# 公司名称
@@ -626,10 +644,11 @@ class SikuyiSpider(RedisSpider):
 		project_bids["pm_identification_id"] = response.xpath("//table[@class='pro_table_box datas_table']/tbody/tr[15]/td[2]/text()").extract_first()
 		# 记录登记时间
 		project_bids["record_date"] = response.xpath("//table[@class='pro_table_box datas_table']/tbody/tr[16]/td[1]/text()").extract_first()
-		project_bids["bid_company_id"]= str(response.xpath("//table[@class='pro_table_box datas_table']/tbody/tr[14]/td[1]/a/@href").extract_first()).split("/")[-1]
-		try:
-			project_bids["bid_company_name"] = response.xpath("//table[@class='pro_table_box datas_table']/tbody/tr[16]/td[1]/a/text()").extract_first()
-		except:
+		project_bids["bid_company_id"]= response.xpath("//table[@class='pro_table_box datas_table']/tbody/tr[14]/td[1]/a/@href").extract_first()
+		if project_bids["bid_company_id"]:
+			project_bids["bid_company_id"] = project_bids["bid_company_id"].split("/")[-1]
+		project_bids["bid_company_name"] = response.xpath("//table[@class='pro_table_box datas_table']/tbody/tr[16]/td[1]/a/text()").extract_first()
+		if project_bids["bid_company_name"] is None:
 			project_bids["bid_company_name"]= response.xpath("//table[@class='pro_table_box datas_table']/tbody/tr[16]/td[1]/text()").extract_first()
 		project_bids["bid_company_num"]= response.xpath("//table[@class='pro_table_box datas_table']/tbody/tr[14]/td[2]/text()").extract_first()
 		project_bids["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')

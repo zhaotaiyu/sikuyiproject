@@ -60,7 +60,7 @@ class PgsqlPipeline(object):
 		self.db.close()
 	def process_item(self,item,spider):
 		ite=dict(item)
-		sql="INSERT INTO company_wash.{} (".format(item.collection)
+		sql="INSERT INTO sikuyi.{} (".format(item.collection)
 		v_list=[]
 		k_list=[]
 		for key,value in ite.items():
@@ -105,13 +105,13 @@ class ScrapyKafkaPipeline(object):
 		try:
 			self._producer.produce(json.dumps((msg),ensure_ascii=False).encode(encoding="UTF-8"))
 			print("fasongyitiao")
-		except (SocketDisconnectedError, LeaderNotAvailable) as e:
+		except:
 			try:
 				self._producer = self._client.topics[TOPIC.encode(encoding="UTF-8")].get_producer()
 				self._producer.stop()
 				self._producer.start()
 				self._producer.produce(json.dumps((msg),ensure_ascii=False).encode(encoding="UTF-8"))
-			except Exception as e:
+			except:
 				myclient = pymongo.MongoClient('mongodb://ecs-a025-0002:27017/')
 				mydb=myclient[mongodatabase] 
 				mycol=mydb[mongotable]

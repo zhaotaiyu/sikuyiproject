@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import pymongo
 import re
 
 import requests
@@ -51,26 +52,32 @@ def fetch_one_proxy():
                         safe = requests.get(loc_url,headers=headers,proxies=proxies,timeout=20,allow_redirects=False)
                         logging.debug("安全狗认证成功")
                     fetch_time = time.time()
-                    logging.debug("已成功获取代理")
+                    logging.debug("已成功返回代理")
                     return fetch_time,proxy
-                logging.debug("安全认证失败")
-            logging.debug("获取代理失败")
+            logging.debug("获取代理成功，认证失败")
         except:
             logging.debug("获取代理失败")
 
 def get_id(sql):
-    db = psycopg2.connect(database="province", user="postgres", password="sikuyi", host="ecs-a025-0002", port=54321)
+    db = psycopg2.connect(database="cic_database", user="postgres", password="sikuyi", host="ecs-a025-0002", port=54321)
     cursor = db.cursor()
     cursor.execute(sql)
     datalist = []
     alldata = cursor.fetchall()
     for s in alldata:
-        data = s[0].split("?")[0]
-        if len(data)>5:
-            datalist.append(data)
+        if s[0]:
+            data = s[0].split("?")[0]
+            if len(data)>5:
+                datalist.append(data)
     cursor.close()
     db.close()
-    return datalist
+
+    connection = pymongo.MongoClient('119.3.206.20', 27017)
+    db = connection['sikuyilog']  # ['MONGODB_DB']
+    collection = db['completed_company']  # settings['MONGODB_COLLECTION']
+    completed_company_list = set(msg.get('company_id') for msg in collection.find() if 'company_id' in msg)
+    connection.close()
+    return datalist,completed_company_list
 class Wash:
     def __init__(self):
         self.company_set = set()
