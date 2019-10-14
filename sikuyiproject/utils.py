@@ -31,32 +31,37 @@ def fetch_one_proxy():
     time.sleep(1)
     while 1:
         time.sleep(2)
-        try:
-            fetch_url = api_url.format(orderid)
-            r = requests.get(fetch_url,timeout=5)
-            if r.status_code == 200:
-                content = json.loads(r.content.decode('utf-8'))
-                ips = content['data']['proxy_list']
-                proxy=ips[0]
-                proxies = {
-                    "http": "http://%(user)s:%(pwd)s@%(proxy)s/" % {'user': username, 'pwd': password, 'proxy': proxy},
-                    "https": "http://%(user)s:%(pwd)s@%(proxy)s/" % {'user': username, 'pwd': password, 'proxy': proxy}
-                }
-                logging.debug("正在进行安全狗认证")
-                req=requests.get(test_url,headers=headers,proxies=proxies,timeout=20,allow_redirects=False)
-                #安全狗认证
-                loc_url = req.headers.get("Location")
-                if loc_url:
-                    if "http" not in loc_url:
-                        loc_url = 'http://jzsc.mohurd.gov.cn' + loc_url
-                        safe = requests.get(loc_url,headers=headers,proxies=proxies,timeout=20,allow_redirects=False)
-                        logging.debug("安全狗认证成功")
-                    fetch_time = time.time()
-                    logging.debug("已成功返回代理")
-                    return fetch_time,proxy
-            logging.debug("获取代理成功，认证失败")
-        except:
+        # try:
+        fetch_url = api_url.format(orderid)
+        r = requests.get(fetch_url,timeout=5)
+        if r.status_code == 200:
+            content = json.loads(r.content.decode('utf-8'))
+            ips = content['data']['proxy_list']
+            proxy=ips[0]
+            proxies = {
+                "http": "http://%(user)s:%(pwd)s@%(proxy)s/" % {'user': username, 'pwd': password, 'proxy': proxy},
+                "https": "http://%(user)s:%(pwd)s@%(proxy)s/" % {'user': username, 'pwd': password, 'proxy': proxy}
+            }
+            logging.debug("正在进行安全狗认证")
+            req=requests.get(test_url,headers=headers,proxies=proxies,timeout=20,allow_redirects=False)
+            #安全狗认证
+            loc_url = req.headers.get("Location")
+            if loc_url:
+                if "http" not in loc_url:
+                    loc_url = 'http://jzsc2016.mohurd.gov.cn' + loc_url
+                    safe = requests.get(loc_url,headers=headers,proxies=proxies,timeout=20,allow_redirects=False)
+                    logging.debug("安全狗认证成功")
+                fetch_time = time.time()
+                logging.debug("已成功返回代理")
+                return fetch_time,proxy
+                #logging.debug("获取代理成功，认证失败")
+            else:
+                fetch_time = time.time()
+                return fetch_time, proxy
+        else:
             logging.debug("获取代理失败")
+        # except:
+        #     logging.debug("获取代理失败")
 
 def get_id(sql):
     db = psycopg2.connect(database="cic_database", user="postgres", password="sikuyi", host="ecs-a025-0002", port=54321)
