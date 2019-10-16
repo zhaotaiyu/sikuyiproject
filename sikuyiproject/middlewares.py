@@ -128,12 +128,12 @@ class ProxyMiddleware(object):
 
     def while_get_proxy(self):
         while True:
-            res = requests.get('http://192.168.4.142:8999/zhilian_sikuyi')
+            res = requests.get('http://127.0.0.1:8999/zhilian_sikuyi')
             self.proxy = res.json()['proxy']
             time.sleep(1)
 
     @staticmethod
     def get_proxy():
-        res = requests.get('http://192.168.4.142:8999/zhilian_sikuyi')
+        res = requests.get('http://127.0.0.1:8999/zhilian_sikuyi')
         return res.json()['proxy']
 

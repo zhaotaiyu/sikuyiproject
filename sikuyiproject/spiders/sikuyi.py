@@ -16,7 +16,6 @@ class SikuyiSpider(RedisSpider):
 		sql1 = "SELECT distinct company_id FROM company_wash.companyinformation"
 		#sql2 = "SELECT num FROM companyinformation"
 		id_list,completed_company_list = get_id(sql1)
-		print(completed_company_list)
 		for id_i in id_list:
 			if len(id_i) == 18:
 				if id_i not in completed_company_list:
@@ -41,7 +40,7 @@ class SikuyiSpider(RedisSpider):
 		# 			if data_i == data_j:
 		# 				while 1:
 		# 					id_i +=1
-		# 					url = "http://jzsc.mohurd.gov.cn/dataservice/query/comp/compDetail/00" + str(id_i)
+		# 					url = "http://jzsc2016.mohurd.gov.cn/dataservice/query/comp/compDetail/00" + str(id_i)
 		# 					yield Request(url,callback = self.parse_company,dont_filter=True)
 		# 					if id_i+1 == id_j:
 		# 						break
@@ -50,7 +49,7 @@ class SikuyiSpider(RedisSpider):
 		# 	else:
 		# 		break
 
-		# url="http://jzsc.mohurd.gov.cn/dataservice/query/comp/list"
+		# url="http://jzsc2016.mohurd.gov.cn/dataservice/query/comp/list"
 		# wash = Wash()
 		# wash.main()
 		# company_set=wash.company_set
@@ -76,7 +75,7 @@ class SikuyiSpider(RedisSpider):
 	# 		tr_list = response.xpath("//tbody[@class='cursorDefault']/tr")
 	# 		for tr in tr_list:
 	# 			company_url = tr.xpath("./td[3]/a/@href").extract_first()
-	# 			company_url="http://jzsc.mohurd.gov.cn"+str(company_url)
+	# 			company_url="http://jzsc2016.mohurd.gov.cn"+str(company_url)
 	# 			yield Request(url=company_url,callback=self.parse_company,meta={"company":response.meta.get("company")})
 	# 		page = response.meta.get("page",1)
 	# 		try:
@@ -143,34 +142,34 @@ class SikuyiSpider(RedisSpider):
 			c_info["is_delete"] = 0
 			c_info["url"]=response.url
 			yield c_info
-			# # 资质资格url
-			# aptitude_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[1]/a/@data-url").extract_first()
-			# aptitude_url = "http://jzsc.mohurd.gov.cn" + aptitude_url
-			# yield Request(aptitude_url,callback=self.parse_aptitude,meta={"company_id":company_id})
-			# # 注册人员url
-			# registered_personnel_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[2]/a/@data-url").extract_first()
-			# registered_personnel_url = "http://jzsc.mohurd.gov.cn" + str(registered_personnel_url)
-			# yield Request(registered_personnel_url, callback=self.get_registered_personnel, meta={"company_id": company_id})
-			# # 工程项目url
-			# engineering_project_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[3]/a/@data-url").extract_first()
-			# engineering_project_url = "http://jzsc.mohurd.gov.cn" + str(engineering_project_url)
-			# yield Request(url=engineering_project_url,callback=self.get_engineering_project,meta={"company_id":company_id})
-			# # 不良行为url
-			# bad_behavior_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[4]/a/@data-url").extract_first()
-			# bad_behavior_url = "http://jzsc.mohurd.gov.cn" + str(bad_behavior_url)
-			# yield Request(url=bad_behavior_url,callback=self.parse_behavior,meta={"company_id":company_id,"reason":"不良行为"})
-			# # 良好行为url
-			# good_behavior_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[5]/a/@data-url").extract_first()
-			# good_behavior_url = "http://jzsc.mohurd.gov.cn" + str(good_behavior_url)
-			# #yield Request(url=good_behavior_url, callback=self.parse_behavior,meta={"company_id": company_id, "reason": "良好行为"})
-			# # 黑名单记录url
-			# blacklist_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[6]/a/@data-url").extract_first()
-			# blacklist_url = "http://jzsc.mohurd.gov.cn" + str(blacklist_url)
-			# yield Request(url=blacklist_url, callback=self.parse_companny_blacklist,meta={"company_id": company_id, "reason": "黑名单"})
-			# # 失信联合惩戒记录url
-			# break_faith_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[7]/a/@data-url").extract_first()
-			# break_faith_url = "http://jzsc.mohurd.gov.cn" + str(break_faith_url)
-			# yield Request(url=break_faith_url, callback=self.parse_company_break_faith,meta={"company_id": company_id, "reason": "黑名单"})
+			# 资质资格url
+			aptitude_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[1]/a/@data-url").extract_first()
+			aptitude_url = "http://jzsc2016.mohurd.gov.cn" + aptitude_url
+			yield Request(aptitude_url,callback=self.parse_aptitude,meta={"company_id":company_id})
+			# 注册人员url
+			registered_personnel_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[2]/a/@data-url").extract_first()
+			registered_personnel_url = "http://jzsc2016.mohurd.gov.cn" + str(registered_personnel_url)
+			yield Request(registered_personnel_url, callback=self.get_registered_personnel, meta={"company_id": company_id})
+			# 工程项目url
+			engineering_project_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[3]/a/@data-url").extract_first()
+			engineering_project_url = "http://jzsc2016.mohurd.gov.cn" + str(engineering_project_url)
+			yield Request(url=engineering_project_url,callback=self.get_engineering_project,meta={"company_id":company_id})
+			# 不良行为url
+			bad_behavior_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[4]/a/@data-url").extract_first()
+			bad_behavior_url = "http://jzsc2016.mohurd.gov.cn" + str(bad_behavior_url)
+			yield Request(url=bad_behavior_url,callback=self.parse_behavior,meta={"company_id":company_id,"reason":"不良行为"})
+			# 良好行为url
+			good_behavior_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[5]/a/@data-url").extract_first()
+			good_behavior_url = "http://jzsc2016.mohurd.gov.cn" + str(good_behavior_url)
+			#yield Request(url=good_behavior_url, callback=self.parse_behavior,meta={"company_id": company_id, "reason": "良好行为"})
+			# 黑名单记录url
+			blacklist_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[6]/a/@data-url").extract_first()
+			blacklist_url = "http://jzsc2016.mohurd.gov.cn" + str(blacklist_url)
+			yield Request(url=blacklist_url, callback=self.parse_companny_blacklist,meta={"company_id": company_id, "reason": "黑名单"})
+			# 失信联合惩戒记录url
+			break_faith_url = response.xpath("//ul[@class='tinyTab datas_tabs']/li[7]/a/@data-url").extract_first()
+			break_faith_url = "http://jzsc2016.mohurd.gov.cn" + str(break_faith_url)
+			yield Request(url=break_faith_url, callback=self.parse_company_break_faith,meta={"company_id": company_id, "reason": "黑名单"})
 		else:
 			myclient = pymongo.MongoClient('mongodb://ecs-a025-0002:27017/')
 			mydb = myclient[MONGODATABASE]
@@ -343,42 +342,42 @@ class SikuyiSpider(RedisSpider):
 					# 人员基本信息
 					person_url = tr.xpath("./td[2]/a/@onclick").extract_first()
 					if person_url is not None:
-						person_url = "http://jzsc.mohurd.gov.cn" + tr.xpath("./td[2]/a/@onclick").extract_first().split("'")[1]
+						person_url = "http://jzsc2016.mohurd.gov.cn" + tr.xpath("./td[2]/a/@onclick").extract_first().split("'")[1]
 						person_name = tr.xpath("./td[2]/a/text()").extract_first()
 						person_id = person_url.split("/")[-1]
 						yield Request(url=person_url, callback=self.parse_person_detail,meta={"person_name": person_name, "person_id": person_id,"company_id": response.meta["company_id"]})
 						# 不良行为url
-						person_bad_behaviour_url = "http://jzsc.mohurd.gov.cn/dataservice/query/staff/staffCreditRecordList/" + person_id + "/0"
+						person_bad_behaviour_url = "http://jzsc2016.mohurd.gov.cn/dataservice/query/staff/staffCreditRecordList/" + person_id + "/0"
 						yield Request(url=person_bad_behaviour_url, callback=self.parse_behavior, meta={"reason": "不良行为"})
 						# 良好行为url
-						person_good_behaviour_url = "http://jzsc.mohurd.gov.cn/dataservice/query/staff/staffCreditRecordList/" + person_id + "/1"
+						person_good_behaviour_url = "http://jzsc2016.mohurd.gov.cn/dataservice/query/staff/staffCreditRecordList/" + person_id + "/1"
 						#yield Request(url=person_good_behaviour_url, callback=self.parse_behavior, meta={"reason": "良好行为"})
 						# 黑名单记录url
-						person_blacklist_url = "http://jzsc.mohurd.gov.cn/dataservice/query/staff/staffCreditBlackList/" + person_id
+						person_blacklist_url = "http://jzsc2016.mohurd.gov.cn/dataservice/query/staff/staffCreditBlackList/" + person_id
 						yield Request(url=person_blacklist_url, callback=self.parse_companny_blacklist,meta={"reason": "黑名单"})
 						# 变更记录url
-						person_change_record_url = "http://jzsc.mohurd.gov.cn/dataservice/query/staff/staffWorkRecordList/" + person_id
+						person_change_record_url = "http://jzsc2016.mohurd.gov.cn/dataservice/query/staff/staffWorkRecordList/" + person_id
 						yield Request(url=person_change_record_url, callback=self.parse_change_record,meta={"person_id": person_id, })
 	# 解析人员列表
 	def parse_registered_personnel(self,response):
 		tr_list = response.xpath("//tbody/tr")
 		for tr in tr_list[0:-1]:
 			# 人员基本信息
-			person_url = "http://jzsc.mohurd.gov.cn" + tr.xpath("./td[2]/a/@onclick").extract_first().split("'")[1]
+			person_url = "http://jzsc2016.mohurd.gov.cn" + tr.xpath("./td[2]/a/@onclick").extract_first().split("'")[1]
 			person_name = tr.xpath("./td[2]/a/text()").extract_first()
 			person_id = person_url.split("/")[-1]
 			yield Request(url=person_url, callback=self.parse_person_detail,meta={"person_name":person_name,"person_id":person_id,"company_id":response.meta["company_id"]})
 			# 不良行为url
-			person_bad_behaviour_url = "http://jzsc.mohurd.gov.cn/dataservice/query/staff/staffCreditRecordList/" + person_id + "/0"
+			person_bad_behaviour_url = "http://jzsc2016.mohurd.gov.cn/dataservice/query/staff/staffCreditRecordList/" + person_id + "/0"
 			yield Request(url=person_bad_behaviour_url, callback=self.parse_behavior, meta={"reason": "不良行为"})
 			# 良好行为url
-			person_good_behaviour_url = "http://jzsc.mohurd.gov.cn/dataservice/query/staff/staffCreditRecordList/" + person_id + "/1"
+			person_good_behaviour_url = "http://jzsc2016.mohurd.gov.cn/dataservice/query/staff/staffCreditRecordList/" + person_id + "/1"
 			#yield Request(url=person_good_behaviour_url, callback=self.parse_behavior,meta={"reason": "良好行为"})
 			# 黑名单记录url
-			person_blacklist_url = "http://jzsc.mohurd.gov.cn/dataservice/query/staff/staffCreditBlackList/" + person_id
+			person_blacklist_url = "http://jzsc2016.mohurd.gov.cn/dataservice/query/staff/staffCreditBlackList/" + person_id
 			yield Request(url=person_blacklist_url, callback=self.parse_person_blacklist,meta={"reason": "黑名单"})
 			# 变更记录url
-			person_change_record_url = "http://jzsc.mohurd.gov.cn/dataservice/query/staff/staffWorkRecordList/" + person_id
+			person_change_record_url = "http://jzsc2016.mohurd.gov.cn/dataservice/query/staff/staffWorkRecordList/" + person_id
 			yield Request(url=person_change_record_url,callback=self.parse_change_record,meta={"person_id":person_id,})
 	# 解析人员基本信息
 	def parse_person_detail(self,response):
@@ -481,7 +480,7 @@ class SikuyiSpider(RedisSpider):
 				for tr in tr_list:
 					project_url = tr.xpath("./td[@data-header='项目编码']/text()").extract_first()
 					if project_url is not None:
-						project_url = "http://jzsc.mohurd.gov.cn/dataservice/query/project/projectDetail/" + tr.xpath("./td[@data-header='项目编码']/text()").extract_first()
+						project_url = "http://jzsc2016.mohurd.gov.cn/dataservice/query/project/projectDetail/" + tr.xpath("./td[@data-header='项目编码']/text()").extract_first()
 						yield Request(url=project_url, callback=self.parse_engineering_project,meta={"company_id": response.meta["company_id"]})
 	#解析项目列表
 	def get_project_list(self, response):
@@ -489,7 +488,7 @@ class SikuyiSpider(RedisSpider):
 		for tr in tr_list[0:-1]:
 			projeect_url = tr.xpath("./td[@data-header='项目编码']/text()").extract_first()
 			if projeect_url is not None:
-				projeect_url = "http://jzsc.mohurd.gov.cn/dataservice/query/project/projectDetail/" + tr.xpath("./td[@data-header='项目编码']/text()").extract_first()
+				projeect_url = "http://jzsc2016.mohurd.gov.cn/dataservice/query/project/projectDetail/" + tr.xpath("./td[@data-header='项目编码']/text()").extract_first()
 				yield Request(url=projeect_url,callback=self.parse_engineering_project,meta={"company_id":response.meta["company_id"]})
 	# 解析项目基本信息
 	def parse_engineering_project(self, response):
@@ -548,7 +547,7 @@ class SikuyiSpider(RedisSpider):
 		if str(log1) != "0":
 			bid_url_list = response.xpath("//div[@id='tab_ztb']/table/tbody/tr")
 			for tr in bid_url_list:
-				bid_url = "http://jzsc.mohurd.gov.cn" + str(
+				bid_url = "http://jzsc2016.mohurd.gov.cn" + str(
 					tr.xpath("./td[@data-header='查看']/a/@data-url").extract_first())
 				yield Request(url=bid_url,callback=self.parse_bid_url,meta={"project_id":project_info["project_id"]})
 		else:
@@ -558,7 +557,7 @@ class SikuyiSpider(RedisSpider):
 		if str(log2) != "0":
 			construction_review_list = response.xpath("//div[@id='tab_sgtsc']/table/tbody/tr")
 			for tr in construction_review_list:
-				construction_review_url = "http://jzsc.mohurd.gov.cn" + str(
+				construction_review_url = "http://jzsc2016.mohurd.gov.cn" + str(
 					tr.xpath("./td[@data-header='查看']/a/@data-url").extract_first())
 				yield Request(url=construction_review_url,callback=self.parse_construction_review_url,meta={"project_id":project_info["project_id"]})
 		else:
@@ -568,7 +567,7 @@ class SikuyiSpider(RedisSpider):
 		if str(log3) != "0":
 			contract_record_list = response.xpath("//div[@id='tab_htba']/table/tbody/tr")
 			for tr in contract_record_list:
-				contract_record_url = "http://jzsc.mohurd.gov.cn" + str(
+				contract_record_url = "http://jzsc2016.mohurd.gov.cn" + str(
 					tr.xpath("./td[@data-header='查看']/a/@data-url").extract_first())
 				yield Request(url=contract_record_url, callback=self.parse_contract_record_url,meta={"project_id": project_info["project_id"]})
 		else:
@@ -578,7 +577,7 @@ class SikuyiSpider(RedisSpider):
 		if str(log4) != "0":
 			construction_permit_list = response.xpath("//div[@id='tab_sgxk']/table/tbody/tr")
 			for tr in construction_permit_list:
-				construction_permit_url = "http://jzsc.mohurd.gov.cn" + str(
+				construction_permit_url = "http://jzsc2016.mohurd.gov.cn" + str(
 					tr.xpath("./td[@data-header='查看']/a/@data-url").extract_first())
 				certificate_date = tr.xpath("./td[@data-header='发证日期']/text()").extract_first()
 				yield Request(url=construction_permit_url, callback=self.parse_construction_permit_url,meta={"project_id": project_info["project_id"],"certificate_date":certificate_date})
@@ -589,7 +588,7 @@ class SikuyiSpider(RedisSpider):
 		if str(log5) != "0":
 			complete_list = response.xpath("//div[@id='tab_jgysba']/table/tbody/tr")
 			for tr in complete_list:
-				complete_url = "http://jzsc.mohurd.gov.cn" + str(
+				complete_url = "http://jzsc2016.mohurd.gov.cn" + str(
 					tr.xpath("./td[@data-header='查看']/a/@data-url").extract_first())
 				yield Request(url=complete_url, callback=self.parse_complete_url,meta={"project_id": project_info["project_id"]})
 		else:

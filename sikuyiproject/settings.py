@@ -25,7 +25,7 @@ ROBOTSTXT_OBEY = False
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 0.3
+DOWNLOAD_DELAY = 0.1
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
@@ -37,11 +37,15 @@ DOWNLOAD_DELAY = 0.3
 #TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
-#DEFAULT_REQUEST_HEADERS = {
-#   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-#   'Accept-Language': 'en',
-#}
-
+DEFAULT_REQUEST_HEADERS = {
+    'Connection': 'keep-alive',
+    'Cache-Control': 'max-age=0',
+    'Upgrade-Insecure-Requests': '1',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+    'Accept-Encoding': 'gzip, deflate',
+    'Accept-Language': 'zh-CN,zh;q=0.9',
+}
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
@@ -55,7 +59,7 @@ DOWNLOADER_MIDDLEWARES = {
    'sikuyiproject.middlewares.MyUseragent': 545,
    'sikuyiproject.middlewares.KuaidailiMiddleware': 543,
    'sikuyiproject.middlewares.MyRetryMiddleware': 700,
-   # 'sikuyiproject.middlewares.ProxyMiddleware': 546,
+   #'sikuyiproject.middlewares.ProxyMiddleware': 546,
 }
 
 # Enable or disable extensions
@@ -69,8 +73,8 @@ DOWNLOADER_MIDDLEWARES = {
 ITEM_PIPELINES = {
    'sikuyiproject.pipelines.SikuyiprojectPipeline': 300,
    'sikuyiproject.pipelines.DatechangePipeline': 301,
-   # 'sikuyiproject.pipelines.ScrapyKafkaPipeline': 304,
-   'sikuyiproject.pipelines.PgsqlPipeline': 302,
+   'sikuyiproject.pipelines.ScrapyKafkaPipeline': 302,
+   'sikuyiproject.pipelines.PgsqlPipeline': 303,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -105,9 +109,9 @@ BLOOMFILTER_HASH_NUMBER = 6
 # Bloom Filter的bit参数，默认30，占用128MB空间，去重量级1亿
 BLOOMFILTER_BIT = 30
 SCHEDULER_PERSIST = True
-REDIS_URL = 'redis://:Z43saw9vGH4Ey3d8@r-2ze7fb50627e7a14pd.redis.rds.aliyuncs.com:6379/13'
+REDIS_URL = 'redis://:Z43saw9vGH4Ey3d8@r-2ze7fb50627e7a14pd.redis.rds.aliyuncs.com:6379/11'
 SCHEDULER_QUEUE_CLASS = "scrapy_redis.queue.FifoQueue"
-DOWNLOAD_TIMEOUT=100
+DOWNLOAD_TIMEOUT=10
 RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 403, 408, 429, 407]
 RETRY_TIMES = 300
 
