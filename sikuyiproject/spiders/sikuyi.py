@@ -7,6 +7,7 @@ import time,datetime
 from scrapy_redis.spiders import RedisSpider
 import time,re
 from sikuyiproject.utils import *
+import logging
 
 class SikuyiSpider(RedisSpider):
 	name = 'sikuyi'
@@ -16,11 +17,12 @@ class SikuyiSpider(RedisSpider):
 		sql1 = "SELECT distinct company_id FROM company_wash.companyinformation"
 		#sql2 = "SELECT num FROM companyinformation"
 		id_list,completed_company_list = get_id(sql1)
+		logging.debug(id_list,completed_company_list)
 		for id_i in id_list:
 			if len(id_i) == 18:
 				if id_i not in completed_company_list:
 					url = "http://jzsc2016.mohurd.gov.cn/dataservice/query/comp/compDetail/" + str(id_i)
-					yield Request(url,callback = self.parse_company,meta={"company_id":id_i})
+					yield Request(url,callback = self.parse_company,meta={"company_id":id_i},dont_filter = True)
 
 		# #num_list = get_id(sql2)
 		# id_list = list(set(id_list))
